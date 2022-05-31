@@ -13,19 +13,16 @@ Oracle Cloud Infrastructure Container Engine for Kubernetes is a fully-managed, 
 
 ## Optional Prerequisites 
 
-- You can manage pulumi stack with stage managed by pulumi itself ,to do so create an account on Pulumi via - https://app.pulumi.com/ 
+- You can manage pulumi stack with stage-managed by pulumi itself ,to do so create an account on Pulumi via - https://app.pulumi.com/ 
 - In the below procedure we will be explaining with steps where state is manged by Pulumi or with a local file .
 
-## How to deploy 
-
-Validate installed softwares
-
----
+## How to deploy
 
 - Validate the execution Pulumi CLI - `pulumi version`
 - Validate the python3 execution - `python -V`
-- Create a new pulumi stack - `pulumi new `
+- Create a new pulumi stack - `pulumi new`
 
-![](images/pul)
+![](images/pulumi_new_with_url.png)
+
 
 
