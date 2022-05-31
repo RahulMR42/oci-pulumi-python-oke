@@ -1,45 +1,39 @@
-import os
-from resources.common import  common_config
-from resources.artifact import  artifacts
-from resources.devops import devops
-from resources.notification import notification
 from resources.oke import oke
 from resources.network import network
-from resources.logs import logs
 from pulumi import Config
 
-
-"""To remov"""
-import pulumi_oci as oci
-config_object = common_config('ocid1.compartment.oc1..aaaaaaaalmc42p5bsqbfo5jkle7uy7bwnlazr7ghw26qorsidrwbl6mk6xva',
-                              os.environ['TF_VAR_region'],
-                              'mr_pulumi')
-"""" - """
+""" Load common pulumi config """
 config = Config()
-notification_topic = notification().create_notification_topic(config)
-log_group = logs().create_log_group(config)
-
-
+""" VCN Creation """
 vcn = network().create_vcn(config)
 
+""" Service Gateway for OKE """
 service_gateway = network().create_service_gateway(config,vcn)
+""" Nat gateway for OKE  """
 nat_gateway = network().create_natgateway(config,vcn)
+""" Internget gateway for OKE  """
 internet_gateway = network().create_internet_gateway(config,vcn)
 
+""" Security list for OKE nodes """
 node_security_list = network().create_node_securitylist(config,vcn)
+""" Security list for OKE svclb"""
 svclb_security_list = network().create_svclb_securitylist(config,vcn)
+""" Security list for OKE API endpoint"""
 apiendpoint_security_list = network().create_apiendpoint_securitylist(config,vcn)
 
+""" Route table for OKE Node """
 oke_node_route_table=network().create_node_routetable(config,vcn,service_gateway,nat_gateway)
+""" Route table for oke svclb"""
 oke_svclb_route_table=network().create_svclb_routetable(config,vcn,internet_gateway)
 
+""" Subnet for OKE node """
 node_subnet = network().create_node_subnet(config,vcn,oke_node_route_table,node_security_list)
+""" Subnet for OKE svclb"""
 lb_subnet = network().create_lb_subnet(config,vcn,oke_svclb_route_table,svclb_security_list)
+""" Subnet for OKE endpoint  """
 apiendpoint_subnet = network().create_apiendpoint_subnet(config,vcn,oke_svclb_route_table,apiendpoint_security_list)
 
-container_repository = artifacts().container_repo(config)
+"""Creation of OKE Cluster"""
 oke_cluster = oke().create_cluster(config,vcn,apiendpoint_subnet,lb_subnet)
+"""Creation of OKE node pool"""
 oke_nodepool = oke().create_nodepool(config,oke_cluster,node_subnet)
-
-devops_project = devops().create_devops_project(config,notification_topic)
-log = logs().create_logs(config,log_group,devops_project)
